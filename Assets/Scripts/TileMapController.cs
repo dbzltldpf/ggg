@@ -11,16 +11,19 @@ public class TileMapController : MonoBehaviour
     public Tilemap tilemap2;
 
 
-    public Transform enemy; // Start
-    public Transform target; // End
+    //public Transform enemy; // Start
+    //public Transform target; // End
 
     public Tilemap colorTileMap;
     public Tile colorTile;
     public Color pathColor;
 
+    // 적들의 집합체
+    public Dictionary<GameObject, Stack<Node>> mObj = new Dictionary<GameObject, Stack<Node>>();
+
     private void Start()
     {
-
+        // 전체 타일 초기화
         foreach (var pos in tilemap.cellBounds.allPositionsWithin)
         {
             if (tilemap.HasTile(pos))
@@ -30,6 +33,7 @@ public class TileMapController : MonoBehaviour
             }
         }
 
+        // 진입불가 타일 초기화
         foreach (var pos in tilemap2.cellBounds.allPositionsWithin)
         {
             if (tilemap2.HasTile(pos))
@@ -37,19 +41,36 @@ public class TileMapController : MonoBehaviour
                 nodes[pos].Walkable = false;
             }
         }
-
     }
 
+    //public Stack<Node> GetNodes(GameObject obj)
+    //{
+    //    Stack<Node> outputNodes = new Stack<Node>();
 
-    public void FindPath()
+    //    foreach(var k in mObj.Keys)
+    //    {
+    //        if (k == obj)
+    //            outputNodes = mObj.Values;
+    //    }
+    //}
+
+    //public void FindPath()
+    //{
+    //    Vector3Int start = tilemap.WorldToCell(enemy.position);
+    //    Vector3Int end = tilemap.WorldToCell(target.position);
+
+    //    //StartCoroutine(GetPath(start, end));
+    //}
+
+    public void FindPath(Transform _target, GameObject obj)
     {
-        Vector3Int start = tilemap.WorldToCell(enemy.position);
-        Vector3Int end = tilemap.WorldToCell(target.position);
+        Vector3Int start = tilemap.WorldToCell(obj.transform.position);
+        Vector3Int end = tilemap.WorldToCell(_target.position);
 
-        StartCoroutine(GetPath(start, end));
+        StartCoroutine(GetPath(start, end, obj));
     }
 
-    IEnumerator GetPath(Vector3Int start, Vector3Int end)
+    IEnumerator GetPath(Vector3Int start, Vector3Int end, GameObject obj)
     {
 
         Stack<Node> wayNodes = new Stack<Node>();
@@ -104,7 +125,7 @@ public class TileMapController : MonoBehaviour
 
         }
 
-        FinishedProcessingPath(wayNodes, pathSuccess);
+        FinishedProcessingPath(wayNodes, pathSuccess, obj);
 
         yield return null;
     }
@@ -166,7 +187,7 @@ public class TileMapController : MonoBehaviour
         return path;
     }
 
-    private void FinishedProcessingPath(Stack<Node> path, bool Successed)
+    private void FinishedProcessingPath(Stack<Node> path, bool Successed, GameObject obj)
     {
         if (Successed)
         {
@@ -177,6 +198,8 @@ public class TileMapController : MonoBehaviour
 
             }
         }
+
+        mObj.Add(obj, path);
     }
 
     private void ColorTile(Vector3Int position, Color color)
@@ -185,5 +208,4 @@ public class TileMapController : MonoBehaviour
         colorTileMap.SetTileFlags(position, TileFlags.None);
         colorTileMap.SetColor(position, color);
     }
-
 }

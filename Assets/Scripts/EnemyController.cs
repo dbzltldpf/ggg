@@ -19,13 +19,15 @@ public class EnemyController : MonoBehaviour
 
     //길찾기 구현하기
     private Vector2 destinationPosition; // 목적지
-    //private PathFindingManager pathFindingManager;
+    private TileMapController tileMapController;
     //public GameController enemyobj;
 
     public GameObject enemy;
     [SerializeField] private PlayerController player;
     public GameController gameController;
     [SerializeField] private WeaponBoard weaponBoard;
+
+    public Stack<Node> nodes = new Stack<Node>();
 
     private void Awake()
     {
@@ -50,7 +52,7 @@ public class EnemyController : MonoBehaviour
         // target이 있을때
         if (target != null)
         {
-            //pathFindingManager.PathFinding();
+            tileMapController.FindPath(target, this.gameObject);
 
             // 목적지에 타겟 포지션 넣어줌
             destinationPosition = target.position;
@@ -59,9 +61,10 @@ public class EnemyController : MonoBehaviour
             attackDistance = Vector2.Distance(transform.position, target.position);
             if (attackDistance > 1f)
             {
-                //pathFindingManager.PathFinding();
 
-                transform.position = Vector2.MoveTowards(transform.position, destinationPosition, Time.fixedDeltaTime * speed);
+
+                // 기본 이동식
+                //transform.position = Vector2.MoveTowards(transform.position, destinationPosition, Time.fixedDeltaTime * speed);
                 animator.SetFloat("Speed", 1f);
 
             }
@@ -200,4 +203,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    public void SetNodes(Stack<Node> _nodes)
+    {
+        nodes = _nodes;
+    }
 }
