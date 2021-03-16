@@ -19,7 +19,11 @@ public class TileMapController : MonoBehaviour
     public Color pathColor;
 
     // 적들의 집합체
-    public Dictionary<GameObject, Stack<Node>> mObj = new Dictionary<GameObject, Stack<Node>>();
+    //public Dictionary<GameObject, Stack<Node>> mObj = new Dictionary<GameObject, Stack<Node>>();
+    public Dictionary<string, Queue<Node>> mObj = new Dictionary<string, Queue<Node>>();
+
+    public EnemyController ec;
+
 
     private void Start()
     {
@@ -43,23 +47,22 @@ public class TileMapController : MonoBehaviour
         }
     }
 
-    //public Stack<Node> GetNodes(GameObject obj)
+    //public Queue<Node> GetNodes(GameObject obj)
     //{
-    //    Stack<Node> outputNodes = new Stack<Node>();
+    //    Queue<Node> outputNodes = new Queue<Node>();
 
-    //    foreach(var k in mObj.Keys)
+    //    foreach (var k in mObj.Keys)
     //    {
-    //        if (k == obj)
-    //            outputNodes = mObj.Values;
+    //        if (k == obj.name)
+    //        {
+    //            while(mObj[k].Count > 0)
+    //            {
+    //                outputNodes.Enqueue(mObj[k].Dequeue());
+    //            }
+    //        }
     //    }
-    //}
 
-    //public void FindPath()
-    //{
-    //    Vector3Int start = tilemap.WorldToCell(enemy.position);
-    //    Vector3Int end = tilemap.WorldToCell(target.position);
-
-    //    //StartCoroutine(GetPath(start, end));
+    //    return outputNodes;
     //}
 
     public void FindPath(Transform _target, GameObject obj)
@@ -191,15 +194,17 @@ public class TileMapController : MonoBehaviour
     {
         if (Successed)
         {
+            //Queue<Node> q = new Queue<Node>();
+
             while (path.Count > 0)
             {
                 Node node = path.Pop();
+                //q.Enqueue(node);
                 ColorTile(node.Position, pathColor);
 
+                ec.SetNodeList(node);
             }
         }
-
-        mObj.Add(obj, path);
     }
 
     private void ColorTile(Vector3Int position, Color color)
