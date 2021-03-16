@@ -18,14 +18,20 @@ public class EnemyController : MonoBehaviour
     private float attackDistance;
 
     //길찾기 구현하기
+    //private Vector2 destinationPosition; // 목적지
     private Vector2 destinationPosition; // 목적지
-    //private PathFindingManager pathFindingManager;
+    public TileMapController tileMapController;
     //public GameController enemyobj;
 
     public GameObject enemy;
     [SerializeField] private PlayerController player;
     public GameController gameController;
     [SerializeField] private WeaponBoard weaponBoard;
+
+    public Queue<Node> nodes = new Queue<Node>();
+    private List<Node> lNodes = new List<Node>();
+
+    private int nIndex;
 
     private void Awake()
     {
@@ -38,35 +44,66 @@ public class EnemyController : MonoBehaviour
     {
         //enemyobj = FindObjectOfType<GameController>();
         //pathFindingManager = FindObjectOfType<PathFindingManager>();
-        destinationPosition = transform.position;
+        destinationPosition = Vector2.zero;
         attackTime = 0f;
         stayTime = 0f;
         Hp = 5;
         GetExp = 1;
         MoveRight = true;
     }
+    private void Start()
+    {
+        nIndex = 0;
+    }
     public void FixedUpdate()
     {
         // target이 있을때
         if (target != null)
         {
-            //pathFindingManager.PathFinding();
+            tileMapController.FindPath(target, this.gameObject);
+
+            //nodes = tileMapController.GetNodes(this.gameObject);
+
+            //for(int i = 0; i < nodes.Count; ++i)
+            //{
+            //    lNodes.Add(nodes.Dequeue());
+            //}
 
             // 목적지에 타겟 포지션 넣어줌
             destinationPosition = target.position;
+            //destinationPosition = Vector2.zero;
 
             // player와의 거리
             attackDistance = Vector2.Distance(transform.position, target.position);
             if (attackDistance > 1f)
             {
-                //pathFindingManager.PathFinding();
+                //Node node = nodes.Dequeue();
+                //Debug.Log(lNodes.Count);
 
+                if(lNodes.Count > 0)
+                {
+                    Node node = lNodes[nIndex];
+                
+                    Vector2 vec = new Vector2(node.Position.x, node.Position.y);
+
+                    Debug.Log(vec);
+
+                    destinationPosition = vec;
+                }
+
+                // 기본 이동식
                 transform.position = Vector2.MoveTowards(transform.position, destinationPosition, Time.fixedDeltaTime * speed);
                 animator.SetFloat("Speed", 1f);
 
+                float distance = Vector2.Distance(transform.position, destinationPosition);
+
+                if (distance < .5f)
+                    ++nIndex;
             }
             else if (attackDistance <= 1f)
             {
+                //++nIndex;
+                Debug.Log(nIndex);
                 if (attackTime > 2f)
                 {
                     animator.SetFloat("Speed", 0f);
@@ -115,7 +152,10 @@ public class EnemyController : MonoBehaviour
         }
 
     }
-
+    public void SetNodeList(Node node)
+    {
+        lNodes.Add(node);
+    }
     private void SetRedirection()
     {
         // 목적지 = 랜덤위치 값
@@ -200,4 +240,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    public void SetNodes(Queue<Node> _nodes)
+    {
+        nodes = _nodes;
+    }
 }
